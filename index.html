@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Reading Span Task</title>
+<style>
+  :root { --bg:#f6f7fb; --fg:#1f2a44; --muted:#5b6a86; --acc:#2f7dff; --warn:#ffb84d; --bad:#e04f3f; --good:#2ca56a; --card:#ffffff; --border:#d9e1ee; }
+  body{background:var(--bg);color:var(--fg);font-family:"Source Sans Pro","Noto Sans JP",system-ui,-apple-system,Segoe UI,Helvetica,Arial;line-height:1.7;margin:0;font-size:18px}
+  header{padding:16px 20px;border-bottom:1px solid var(--border);background:#fff}
+  h1{font-size:24px;margin:0}
+  h2{font-size:22px;margin:0 0 8px}
+  main{max-width:940px;margin:0 auto;padding:20px}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 10px 30px rgba(24,44,80,.08);padding:18px;margin:16px 0}
+  label{display:block;margin:.5rem 0 .25rem;color:var(--muted)}
+  input[type="text"],input[type="number"],select{width:100%;padding:12px;border-radius:10px;border:1px solid var(--border);background:#f9fbff;color:var(--fg);font-size:18px}
+  input[type="checkbox"]{transform:scale(1.1);margin-right:.5rem}
+  button{appearance:none;border:0;border-radius:12px;padding:14px 18px;background:linear-gradient(135deg,#4c8dff,#2f7dff);color:#ffffff;font-weight:700;cursor:pointer;font-size:18px;box-shadow:0 8px 20px rgba(47,125,255,.25)}
+  button[disabled]{opacity:.5;cursor:not-allowed;box-shadow:none}
+  .row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .mono{font-family:ui-monospace,Consolas,monospace}
+  .center{text-align:center}
+  .pill{display:inline-block;padding:6px 10px;border-radius:999px;background:#e8efff;color:#1e3c7f;border:1px solid #d3e1ff}
+  .muted{color:var(--muted)}
+  .big{font-size:26px}
+  .sentence{font-size:32px;margin:24px 0 12px;text-align:center;min-height:80px;display:flex;align-items:center;justify-content:center}
+  #letterFlash{min-height:48px;line-height:48px}
+  .keyrow{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+  .key{padding:12px 18px;border-radius:12px;background:#f1f4fb;border:1px solid var(--border)}
+  .ok{color:var(--good)} .ng{color:var(--bad)}
+  .hidden{display:none}
+  .inputs{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px}
+  .foot{margin-top:8px;font-size:14px;color:var(--muted)}
+  .link{color:#1f5fd8;text-decoration:underline;cursor:pointer}
+</style>
+</head>
+<body>
+<header><h1>L2 Reading Span Task — Last-Letter Recall</h1></header>
+<main>
+
+<section id="welcome" class="card">
+  <h2>参加者情報</h2>
+  <div class="row">
+    <div>
+      <label>氏名*</label>
+      <input id="pname" type="text" placeholder="例: 山田花子" required />
+    </div>
+    <div>
+      <label>参加者ID*</label>
+      <input id="pid" type="text" placeholder="例: S001" required />
+    </div>
+  </div>
+  <div class="keyrow" style="margin-top:12px">
+    <button id="btnContinue">説明に進む</button>
+  </div>
+</section>
+
+<section id="instructions" class="card hidden">
+  <h2>手続きと練習</h2>
+  <div class="muted">
+    <p>静かな場所で実施し、Jキー=True / Fキー=False に指を置いたまま進めてください。入力欄にフォーカスがなければスペースキーでも次へ進めます。</p>
+    <p><strong>手順</strong></p>
+    <ul>
+      <li>提示された英文が、意味的に適切→True、不適切→False。</li>
+      <li>各文のあとに英大文字が1つ出ます。順番を覚えてください。</li>
+      <li>セットの最後に、見た順に1文字ずつ入力します（大文字1文字）。</li>
+    </ul>
+    <p><strong>練習について</strong></p>
+    <ul>
+      <li>フェーズ1：文判断の練習（締切なし・フィードバックあり）。</li>
+      <li>フェーズ2：文字想起の練習。判断後の文字を順番に入力します。</li>
+      <li>練習後、個別締切が自動設定され、本試行を開始できます。</li>
+    </ul>
+    <div id="practiceGuidance">
+      <p><strong>練習の流れ</strong></p>
+      <p>フェーズ1：15文のTrue/False判断で操作を確認します。</p>
+      <p>フェーズ2：短いセットで、判断後に出る文字を順番に入力する練習をします。</p>
+      <p>練習完了後に締切が表示され、本試行へ進めます（本試行はフィードバックなし）。</p>
+    </div>
+  </div>
+  <div id="practiceStatus" class="muted" style="margin-top:12px"></div>
+  <div class="keyrow" style="margin-top:12px">
+    <button id="btnPractice">フェーズ1（判断練習）を開始</button>
+    <button id="btnPracticePhase2" class="hidden">フェーズ2（系列想起練習）を開始</button>
+    <button id="btnStart" disabled>本試行を開始</button>
+  </div>
+</section>
+
+<section id="task" class="card hidden">
+  <div id="phase" class="pill">練習</div>
+  <div id="progress" class="muted">1 / 1</div>
+  <div id="deadline" class="muted">締切: — ms</div>
+  <div id="sentence" class="sentence">—</div>
+  <div id="letterFlash" class="center big"></div>
+  <div class="keyrow">
+    <button id="btnFalse" style="background:#ff7d7d">False / 意味的に不適切</button>
+    <button id="btnTrue">True / 意味的に適切</button>
+  </div>
+  <div class="center foot" style="margin-top:6px">True = Jキー / False = Fキー</div>
+  <div id="feedback" class="center muted" style="min-height:28px;margin-top:14px"></div>
+</section>
+
+<section id="recall" class="card hidden">
+  <h2>文字系列想起</h2>
+  <div id="recallInfo" class="muted"></div>
+  <div id="inputs" class="inputs" style="margin-top:10px"></div>
+</section>
+
+<section id="summary" class="card hidden">
+  <h2>結果</h2>
+  <div id="sumText"></div>
+  <div class="keyrow" style="margin-top:12px"><button id="btnExport2">Excel出力（xlsx）</button></div>
+</section>
+
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="script.js"></script>
+</body>
+</html>
